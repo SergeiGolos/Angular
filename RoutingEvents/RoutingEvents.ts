@@ -10,53 +10,58 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 module RoutingEvents {
     /// Private Variables
     var _routeProvider, 
-        _eventStack : Object,
-        _id : number;
+        _eventStack,
+        _id;
 
     angular.module("RoutingEvents", [], function ($routeProvider) {
-        _routeProvider = $routeProvider;        
-        _eventStack = {};
-        _id = 0;
+        _routeProvider = $routeProvider;                        
     }).
-    factory('reRouter', function () {         
+    factory('reRouteStack', function($injector) {
+        var _eventStack = {}, _id = 0;
         return {
-            // Register event and generate 
-            When: function (event : string, args) {
-                var id = _id++,
-                    result = function() { return this; } ();
-
-                _routeProvider.when(event, {
-                    controller: 'ctrlRouting',
-                    template: '<div style="display:none;"></div>',
-                    resolve: { 'name': function () { return event; } }
-                });
-
+            List : function() { return _eventStack; },
+            Push : function(event, id, args) { 
+                
                 _eventStack[event] = _eventStack[event] || {};
                 _eventStack[event][id] = args;
-
                 return {
                     Break: function () {
                         delete _eventStack[event][id];
                     }
                 };
+            },            
+            Process : function (name, ngParams) {
+                if(_eventStack[name] != undefined) {
+                    angular.forEach(_eventStack[name], function (event, index) {
+                        var func = typeof (event) == "function" ? event : event[event.length], argList = $injector.annotate(event), params = [];
+                        angular.forEach(argList, function (arg, index) {
+                            params.push(ngParams[arg] || $injector.get(arg));
+                        });
+                        func.apply(undefined, params);
+                    });
+                }
+            }            
+        };
+    }).
+    factory('reRouter', function (reRouteStack) {         
+        return {
+            // Register event and generate 
+            When: function (event : string, args) {
+                var id = _id++;
+                _routeProvider.when(event, {
+                    controller: 'ctrlRouting',
+                    template: '<div style="display:none;"></div>',
+                    resolve: { 'routeName': function () { return event; } }
+                });
+
+                return reRouteStack.Push(event, id, args);                
             },
 
             // Exposes the event stack
             Routes: function () { return _eventStack;  }            
         };        
     }).
-    controller('ctrlRouting', function ($route, name : string, $injector) {                
-        if (_eventStack[name] != undefined) {
-            angular.forEach(_eventStack[name], function (event, index) {                          
-                var func = typeof (event) == "function" ? event : event[event.length],
-                    argList = $injector.annotate(event),
-                    params = [];                              
-
-                angular.forEach(argList, function (arg, index) {
-                    params.push($route.current.params[arg] || $injector.get(arg));
-                });                
-                func.apply(undefined, params);
-            });
-        }
+    controller('ctrlRouting', function ($route, routeName, reRouteStack) {
+        reRouteStack.Process(routeName, $route.current.params);          
     });    
 }
