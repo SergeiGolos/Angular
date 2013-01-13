@@ -3,13 +3,10 @@ Routing Events
 
 The routing implementation for angular is robust, but for smaller application can be overkill.  To simplify the process in smaller projects Routing Events brings routing events directly to the controller.  Importing the RoutingEvent module enable injecting the reRouter object into a controller.
 
-	Important note: Currently, the RoutingEvents module utilize a dummy <ng-view></ng-view> section.
-	A hidden div is rendered to it, future versions will address this.
+Important note: Currently, the RoutingEvents module utilize a dummy <ng-view></ng-view> section. A hidden div is rendered to it, future versions will address this.
 
-How Does it Work?
+How Does it Work? ([e.g.](sample.html))
 -----------------
-
-	example: [sample.html](https://github.com/SergeiGolos/Angular/blob/master/RoutingEvents/sample.html)
 
 In a scenario where routing main function is to load a template and overlay a controller over it the default routing system simplifies the implementation.  However, another way to look at the role of routing in a UI application, is to notify any interested controllers of the current state of the application.  Building a UI around this strategy also allows deep linking into the application. Routing Events an abstraction to simplify the process. 
 
@@ -23,9 +20,9 @@ With the help of Angulars DI, any function registered with When also gain this b
 		$scope.eventList.push("Event:" +  message)
 	});
 
-	Important Note: Routing Events has not yet been tested against the minification friendly format :
+Important Note: Routing Events has not yet been tested against the minification friendly format :
 
-		['message', '$injector', function(message, $onjector) { }]
+	['message', '$injector', function(message, $onjector) { }]
 
 
 
