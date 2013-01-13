@@ -25,5 +25,10 @@ Important Note: Routing Events has not yet been tested against the minification 
 	['message', '$injector', function(message, $onjector) { }]
 
 
-
-
+TODO
+------
+* create unit test harness
+* create unit tests 
+* remove dependency on nv-view and ng-controller
+* add support for handling minification friendly format
+* add support to handle data requests with promises
