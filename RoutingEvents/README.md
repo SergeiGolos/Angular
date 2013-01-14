@@ -1,4 +1,4 @@
-Routing Events
+Routing Events for AngularJS
 ================
 
 The routing implementation for angular is robust, but for smaller application can be overkill.  To simplify the process in smaller projects Routing Events brings routing events directly to the controller.  Importing the RoutingEvent module enable injecting the reRouter object into a controller.
