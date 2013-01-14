@@ -10,28 +10,56 @@ How Does it Work? ([e.g.](https://github.com/SergeiGolos/Angular/blob/master/Rou
 
 In a scenario where routing main function is to load a template and overlay a controller over it the default routing system simplifies the implementation.  However, another way to look at the role of routing in a UI application, is to notify any interested controllers of the current state of the application.  Building a UI around this strategy also allows deep linking into the application. Routing Events an abstraction to simplify the process. 
 
-Once the reRouter objects is injected into your controller, register a route with the When function.  Because of closure, $scope is available with in the function automatically.
-	
+
+Pain and simple:
+
+Inject the 'RoutingEvents' module into your application and inject the reRouter service into your controller.  Register the route with reRouter and a callback function.  And finally create dummy ng-view element with in the application scope.  Now when the route on the page matches #/Event, the $scope variable of that controller will be set to $scope.id to id from the route variable.  
+
 	var app = angular.module('app', ['RoutingEvents']);
+
 	app.controller('ctrl', function($scope, reRouter) {
-		reRouter.When('/Event', function() { ... });
-	}
-
-With the help of Angulars DI, any function registered with When also gain this benefit.  This applies to variables registered in the route as well as anything available to a controller level injector.  In the example below, bother the :message variable from the route and the DI requested $injector objects are loaded to function at execution.
-
-	app.controller('ctrlMessage', function ($scope, reRouter) {	
-		reRouter.When('/Event/:message', function(message, $injector) { ... });
+		reRouter.When('/Event/:id', function(id) {
+			$scope.id = id;
+		});
 	});
 
-Important Note: Routing Events has not yet been tested against the minification friendly format :
+	// Note, this the quick and dirty example of the bare-bone requirements to get 
+	// routing up and running.  THis example goes against best practices.  Because 
+	// of closure, $scope is available to the callback function. However, this creates 
+	// dependency on $scope and prevents function from being tested.  
+	
 
-	['message', '$injector', function(message, $onjector) { }]
+Dependency Injection to the rescue
+-----------------------------------
+
+Working with the spirit of Angulars DI model, the callback function can request any for variables to be injected. This applies to:  
+
+ * variables registered in the route 
+ * variables defined in the resolve object
+ * variables registered with angulars DI.
+
+
+The handler function is defined outside the scope of the controller, so scope needs to be injected into the function at event resolution,  On top of injecting the scope, the message variable from route parameters and angulars $injector are injected into the function as well.
+	
+	// Here, the handler function has no external dependences and can be tested. 
+ 	
+ 	var handler = function($scope, message, $injector) { 
+ 		$scope.message = message;
+ 	};
+
+	app.controller('ctrlMessage', function ($scope, reRouter) {	
+		reRouter.When('/Event/:message', {
+			event : handler,
+			resolve : { '$scope' : function () { return $scope; }}
+		});
+	});
+
+
+Important Note: Routing Events has not yet been tested against the minification friendly format : ['message', '$injector', function(message, $onjector) { }]
 
 
 TODO
 ------
-* create unit test harness
-* create unit tests 
 * remove dependency on nv-view and ng-controller
-* add support for handling minification friendly format
-* add support to handle data requests with promises
+* 100% Unit Test Coverage;
+* support minification friendly format

@@ -61,29 +61,32 @@
 			var sample;
 			(function (sample) { 
 				
-				var app = angular.module("sample", ['RoutingEvents']);					
+				var app = angular.module("sample", ['RoutingEvents']);
+				sample.externalFunctionWhichCanBeUnitTested = function($scope) { $scope.eventList.push("Event"); };
+				sample.externalFunctionWhichCanBeUnitTested2 = function($scope, message) { $scope.eventList.push("Message:" + message); };
 
 				app.controller('gblMessage', function(){});
 				app.controller('ctrl1', function($scope, reRouter) {
 					$scope.eventList = [];
 
-					reRouter.When('/Event', function() { $scope.eventList.push("Event"); });
-					
-					var func = function(message) { $scope.eventList.push("Event:" +  message); };
-					reRouter.When('/Event/:message', func);
-					reRouter.When('/Event1/:message', func);
+					reRouter.When('/Event', {event : sample.externalFunctionWhichCanBeUnitTested , resolve : { '$scope' : function () { return $scope; }}});										
+					reRouter.When('/Event/:message', {event : sample.externalFunctionWhichCanBeUnitTested2, resolve : { '$scope' : function () { return $scope; }}});
+
+
+					reRouter.When('/Event1/:message', function(message) { $scope.eventList.push("Event:" +  message); });
 
 				});
 
 				app.controller('ctrl2', function($scope, reRouter) {
 					$scope.eventList = [];
 
-					reRouter.When('/Event', function() { $scope.eventList.push("Event"); });					
+					reRouter.When('/Event', {event : sample.externalFunctionWhichCanBeUnitTested , resolve : { '$scope' : function () { return $scope; }}});										
+					reRouter.When('/Event/:message', {event : sample.externalFunctionWhichCanBeUnitTested2, resolve : { '$scope' : function () { return $scope; }}});
 
-					reRouter.When('/Event/:message', function(message) { $scope.eventList.push("Event:" +  message)});
-					reRouter.When('/Event2/:message1/:message2', function(message1, message2) { 
+
+					reRouter.When('/Event2/:message1/:message2', {event: function(message1, message2) { 
 						$scope.eventList.push("Event:" +  message1 + "|" + message2); 
-					});
+					}});
 				});
 
 			})(sample || (sample = {}));

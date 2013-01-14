@@ -25,10 +25,11 @@ var RoutingEvents;
             },
             Broadcast: function (name, ngParams) {
                 if(_eventStack[name] != undefined) {
-                    angular.forEach(_eventStack[name], function (event, index) {
-                        var func = typeof (event) == "function" ? event : event[event.length], argList = $injector.annotate(event), params = [];
+                    angular.forEach(_eventStack[name], function (data, index) {
+                        var event = typeof (data) == "function" ? data : data.event, resolver = data.resolve && typeof (data.resolve) == "object" ? data.resolve : {
+                        }, func = typeof (event) == "function" ? event : event[data.event.length], argList = $injector.annotate(func), params = [];
                         angular.forEach(argList, function (arg, index) {
-                            params.push(ngParams[arg] || $injector.get(arg));
+                            params.push(ngParams[arg] || resolver[arg]() || $injector.get(arg));
                         });
                         func.apply(undefined, params);
                     });

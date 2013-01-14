@@ -1,14 +1,4 @@
 (function() {									
-	Object.prototype.keys = function ()
-	{
-	  var keys = [];
-	  for(var i in this) if (this.hasOwnProperty(i))
-	  {
-	    keys.push(i);
-	  }
-	  return keys;
-	}
-
 	describe('Routing Event Unit Testing', function() {
 	  beforeEach(module('RoutingEvents'));	 
 	 
@@ -22,7 +12,7 @@
 		    	expect(rp).toBeTruthy();
 		    });
 
-		     it('should have a when function', function() {
+		    it('should have a when function', function() {
 		       expect(typeof(rp.when)).toEqual('function');
 		    });
 
@@ -66,23 +56,49 @@
 		    	expect(rs.List().keys().length).toEqual(1);
 		    	expect(rs.List()[route].keys().length).toEqual(2);
 		    });
-		    
+		   
 		    it('should push multiple routes', function() {		    		    		
-				var route = '/home',
-					route2 = '/home2';						    	
-		    	rs.Push(route, function() {});
-		    	rs.Push(route2, function() {});
-		    			    	
+				var route = [];
+					
+					route[0] = '/home',
+					route[1] = '/user';						    	
+		    	rs.Push(route[0], function() {});
+		    	rs.Push(route[1], function() {});
+
+				//contains two routes		    			    	
 		    	expect(rs.List().keys().length).toEqual(2);
 
-		    	expect(rs.List()[route]).toBeTruthy();		    			    	
-		    	expect(rs.List()[route].keys().length).toEqual(1);
+		    	// route 1 exists, and has one event attached
+		    	expect(rs.List()[route[0]]).toBeTruthy();		    			    	
+		    	expect(rs.List()[route[0]].keys().length).toEqual(1);
 		    	
-		    	expect(rs.List()[route2]).toBeTruthy();		    			    	
-		    	expect(rs.List()[route2].keys().length).toEqual(1);
-		    });
+		    	// route 1 exists, and has one event attached
+		    	expect(rs.List()[route[0]]).toBeTruthy();		 		    	   			    
+		    	expect(rs.List()[route[0]].keys().length).toEqual(1);
+		    });		    
 		});
-	});
-	 
 
+		describe('reRouter:' ,function(){
+			var rr;
+			beforeEach(inject(function(reRouter){
+				rr = reRouter;
+			}));
+
+			it ('should exist', function() { 
+				expect(rr).toBeTruthy();
+			})
+
+			it ('it should a response with a function l')
+		})
+	});	
 }());
+
+Object.prototype.keys = function ()
+{
+  var keys = [];
+  for(var i in this) if (this.hasOwnProperty(i))
+  {
+    keys.push(i);
+  }
+  return keys;
+}
