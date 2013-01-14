@@ -3,49 +3,58 @@
         <title>
             Sample Routing Events
         </title>
-        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.min.css" rel="stylesheet"> 
+        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap.min.css" rel="stylesheet"><
         <!-- <link href="style.css" rel="stylesheet"> -->
 	</head>           	
-	<body ng-app="sample">
-		<ng-view></ng-view>		
-		<div class="navbar">
-			<div class="navbar-inner container">
-				<a class="brand" href="#">Events: (on both controllers)</a>
-				<ul class="nav">
-					<li><a href="#/Event">Event</a></li>				  		
-				</ul>			 
-				<form ng-controller="gblMessage" class="navbar-form pull-left">
-				  	<input type="text" class="span4" ng-model="ctrlText" />
-				  	<a href="#/Event/{{ctrlText}}">Send</a>
-				</form>
+	<body>
+		<div ng-app="sample">
+			<ng-view></ng-view>		
+			<div class="navbar">
+				<div class="navbar-inner container">
+					<a class="brand" href="#">Events: (on both controllers)</a>
+					<ul class="nav">
+						<li><a href="#/Event">Event</a></li>				  		
+					</ul>			 
+					<form ng-controller="gblMessage" class="navbar-form pull-left">
+					  	<input type="text" class="span4" ng-model="ctrlText" />
+					  	<a href="#/Event/{{ctrlText}}">Send</a>
+					</form>
+					<ul class="nav pull-right">
+						<li><a href="testRunner.html">Run Unit Test</a></li>				  		
+					</ul>			 
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="span6" ng-controller="ctrl1">
+					<div>
+						<span>Controller 1</span>					
+						<span><input ng-model="cntrlText" class="span2" type="text" /><a href="#/Event1/{{cntrlText}}"> Message</a></span>  	
+					</div>
+					<ul>
+						<li ng-repeat="event in eventList">{{event}}</li>
+					</ul>
+				</div>
+
+
+				<div class="span6" ng-controller="ctrl2">
+					<div>
+						<span>Controller 1</span>					
+						<span><input ng-model="cntrlText" type="text" class="span1" /><input ng-model="cntrlText2"  class="span1"  type="text" /><a href="#/Event2/{{cntrlText}}/{{cntrlText2}}"> Message</a></span> 
+					</div>
+					<ul>
+						<li ng-repeat="event in eventList">{{event}}</li>
+					</ul>
+				</div>
 			</div>
 		</div>
 
-		<div class="row">
-			<div class="span6" ng-controller="ctrl1">
-				<div>
-					<span>Controller 1</span>					
-					<span><input ng-model="cntrlText" class="span2" type="text" /><a href="#/Event1/{{cntrlText}}"> Message</a></span>  	
-				</div>
-				<ul>
-					<li ng-repeat="event in eventList">{{event}}</li>
-				</ul>
-			</div>
-
-
-			<div class="span6" ng-controller="ctrl2">
-				<div>
-					<span>Controller 1</span>					
-					<span><input ng-model="cntrlText" type="text" class="span1" /><input ng-model="cntrlText2"  class="span1"  type="text" /><a href="#/Event2/{{cntrlText}}/{{cntrlText2}}"> Message</a></span> 
-				</div>
-				<ul>
-					<li ng-repeat="event in eventList">{{event}}</li>
-				</ul>
-			</div>
+		<div id="reporter">
+			<body></body>
 		</div>
-
         <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.3.js"> </script>
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.3/angular.min.js"></script>
+
 		<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>        
 		<script src="RoutingEvents.js"></script>        
 		<script type="text/javascript">
