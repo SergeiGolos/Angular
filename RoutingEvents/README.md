@@ -14,16 +14,14 @@ Once the reRouter objects is injected into your controller, register a route wit
 	
 	var app = angular.module('app', ['RoutingEvents']);
 	app.controller('ctrl', function($scope, reRouter) {
-		reRouter.When('/Event', function() { $scope.eventList.push("Event"); });
+		reRouter.When('/Event', function() { ... });
 	}
 
 With the help of Angulars DI, any function registered with When also gain this benefit.  This applies to variables registered in the route as well as anything available to a controller level injector.  In the example below, bother the :message variable from the route and the DI requested $injector objects are loaded to function at execution.
 
 	app.controller('ctrlMessage', function ($scope, reRouter) {	
-		reRouter.When('/Event/:message', function(message, $injector) { 
-			$scope.eventList.push("Event:" +  message)
-		});
-	})
+		reRouter.When('/Event/:message', function(message, $injector) { ... });
+	});
 
 Important Note: Routing Events has not yet been tested against the minification friendly format :
 
