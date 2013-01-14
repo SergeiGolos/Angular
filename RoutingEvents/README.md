@@ -5,7 +5,7 @@ The routing implementation for angular is robust, but for smaller application ca
 
 Important note: Currently, the RoutingEvents module utilize a dummy <ng-view></ng-view> section. A hidden div is rendered to it, future versions will address this.
 
-How Does it Work? ([e.g.](sample.html))
+How Does it Work? ([e.g.](RoutingEvents/sample.html))
 -----------------
 
 In a scenario where routing main function is to load a template and overlay a controller over it the default routing system simplifies the implementation.  However, another way to look at the role of routing in a UI application, is to notify any interested controllers of the current state of the application.  Building a UI around this strategy also allows deep linking into the application. Routing Events an abstraction to simplify the process. 
