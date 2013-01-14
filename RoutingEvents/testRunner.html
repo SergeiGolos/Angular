@@ -3,45 +3,26 @@
         <title>
             RoutingEvents Unit Testing
         </title>   
-        <link href="https://raw.github.com/pivotal/jasmine/master/lib/jasmine-core/jasmine.css" rel="stylesheet">     
-	</head>           	
+        <link href="https://raw.github.com/pivotal/jasmine/master/lib/jasmine-core/jasmine.css" rel="stylesheet">
+    </head>           	
 	<body>
 		<div>
 		</div>
-
         <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.3.js"> </script>      
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.min.js"></script>
         <script src="https://raw.github.com/pivotal/jasmine/master/lib/jasmine-core/jasmine.js"> </script>
 		<script src="https://raw.github.com/pivotal/jasmine/master/lib/jasmine-core/jasmine-html.js"> </script>
-		
-		<script type="text/javascript">
-			var sampleTest;
-			(function(sampleTest) {				
-				
-				describe("A spec", function() {
-				  it("is just a function, so it can contain any code", function() {
-				    var foo = 0;
-				    foo += 1;
-
-				    expect(foo).toEqual(1);
-				  });
-
-				  it("can have more than one expectation", function() {
-				    var foo = 0;
-				    foo += 1;
-
-				    expect(foo).toEqual(1);
-				    expect(true).toEqual(true);
-				  });
-				});
-				
+		<script src="http://cdn.jsdelivr.net/angularjs/1.0.2/angular-mocks.js"> </script>
+		<script src="RoutingEvents.js"></script>
+		<script src="unittests.js"></script>
+		<script type="text/javascript">			
+			(function() {	
 			    var jasmineEnv = jasmine.getEnv();
 			    jasmineEnv.updateInterval = 1000;
 
 			    var trivialReporter = new jasmine.TrivialReporter();
 
 			    jasmineEnv.addReporter(trivialReporter);
-
 			    jasmineEnv.specFilter = function(spec) {
 			        return trivialReporter.specFilter(spec);
 			    };
@@ -58,8 +39,7 @@
 			    function execJasmine() {
 			        jasmineEnv.execute();
 			    }
-
-			})(sampleTest || (sampleTest = {}));
+			}());
 		</script>		
     </body>
 </html>
