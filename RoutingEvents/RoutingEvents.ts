@@ -1,11 +1,11 @@
-/*  	The MIT License (MIT)
-		Copyright (c) 2013 Sergei Golos
+/*      The MIT License (MIT)
+        Copyright (c) 2013 Sergei Golos
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 ///<reference path="AngularTS\angular.d.ts" />
-///<reference path="AngulazrTS\angularPublic.d.ts" />
+///<reference path="AngularTS\angularPublic.d.ts" />
 module RoutingEvents {
     /// Private Variables    
     var _rp;
@@ -41,15 +41,40 @@ module RoutingEvents {
                         var event = typeof(data) == "function" ? data : data.event,
                             resolver = data.resolve && typeof(data.resolve) == "object" ? data.resolve : {},
                             func = typeof (event) == "function" ? event : event[data.event.length], 
-                            argList = $injector.annotate(func), 
-                            params = [];
+                            argList = $injector.annotate(func),                             
+                            params = [],
+                            promises = [],
+                            promiseHandler;
+                        
+                        resolver['$promise'] = function () { return true; };
 
                         angular.forEach(argList, function (arg, index) {
-                            params.push(ngParams[arg] || resolver[arg](ngParams) || $injector.get(arg));
-                        });                        
-
+                            var injectable = ngParams[arg] || resolver[arg](ngParams) || $injector.get(arg);
+                            params.push(injectable);
+                            
+                            if (typeof(injectable.success) == 'function' && typeof(injectable.error) == 'function'){
+                                promises.push({ 'param' : arg, 'injectable' : injectable})
+                            }
+                        });
                         func.apply(undefined, params);
+                        
+                        if (argList.indexOf('$promise') >= 0) {                                                            
+                            angular.forEach(promises, function(promise, index) {
+                                promiseHandler= function (data, status, headers, config) {
+                                    params[argList.indexOf('$promise')] = promise.param;
+                                    params[argList.indexOf(promise.param)] = {
+                                        'data' : data,
+                                        'status' : status,
+                                        'headers' : headers,
+                                        'config' : config
+                                    };
+                                    func.apply(undefined, params);                                   
+                                };              
+                                promise.injectable.success(promiseHandler).error(promiseHandler);
+                            });
+                        }
                     });
+
                 }
             }            
         };
@@ -62,7 +87,7 @@ module RoutingEvents {
                 routeProvider.when(event, {
                     controller: 'ctrlRouting',
                     template: '<div style="display:none;"></div>',
-                    resolve: { 'routeName': function () { return event; } }
+                    resolve: { 'routeName': function () { return event; } }                    
                 });
                 return reRouteStack.Push(event, args);                
             }
