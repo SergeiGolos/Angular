@@ -41,10 +41,12 @@ Working with the spirit of Angulars DI model, the callback function can request 
 
 ### variables defined in the resolve object 
 
-	when ('/Home', { 
-		event : function(variableName) {},
-		resolve : { 'variableName' : function() { return variableValue; }
+	when ('/Home/:message', { 
+		event : function(variableName) { },
+		resolve : {  'variableName' : function(args) { return args.message; }			
 	});
+
+	// args : an object which consists of route variables;
 	
 ### variables registered with angulars DI  
 
@@ -69,8 +71,35 @@ The handler function is defined outside the scope of the controller, as a result
 		});
 	});
 
+### Server Communication
 
-Important Note: Routing Events has not yet been tested against the minification friendly format : ['message', '$injector', function(message, $onjector) { }]
+Well this is great, but route changes usually accompany requests for data.  How do you handle that?  Thanks to googles use of promises, we can simply create a promise which will notify the controller later on the state of the promise.  ( which is done by $http in the example )
+
+
+ 	var handler = function($scope, data, $injector) { 
+ 		data.success(function (data, status) { 
+ 			$scope.model = data;
+ 		});
+ 		
+ 		data.error(function() { 
+ 			$scope.error = true; 
+ 		});
+ 	};
+
+	app.controller('ctrlMessage', function ($scope, reRouter) {	
+		reRouter.When('/Event/:id', {
+			event : handler,
+			resolve : { 
+				'$scope' : function () { return $scope; },
+			    'data' : function(args) {			
+					return $http.get('/someUrl', args);
+				}
+			}
+		});
+	});
+
+
+Important Note: Routing Events has not yet been tested against the minification friendly format : ['message', '$injector', function(message, $injector) { }]
 
 
 TODO
