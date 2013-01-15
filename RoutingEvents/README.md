@@ -86,7 +86,7 @@ Well this is great, but route changes usually accompany requests for data.  How 
  		});
  	};
 
-	app.controller('ctrlMessage', function ($scope, reRouter) {	
+	app.controller('ctrlMessage', function ($scope, $http, reRouter) {	
 		reRouter.When('/Event/:id', {
 			event : handler,
 			resolve : { 
