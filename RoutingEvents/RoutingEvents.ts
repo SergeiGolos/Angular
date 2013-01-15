@@ -45,7 +45,7 @@ module RoutingEvents {
                             params = [];
 
                         angular.forEach(argList, function (arg, index) {
-                            params.push(ngParams[arg] || resolver[arg]() || $injector.get(arg));
+                            params.push(ngParams[arg] || resolver[arg](ngParams) || $injector.get(arg));
                         });                        
 
                         func.apply(undefined, params);

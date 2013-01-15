@@ -29,7 +29,7 @@ var RoutingEvents;
                         var event = typeof (data) == "function" ? data : data.event, resolver = data.resolve && typeof (data.resolve) == "object" ? data.resolve : {
                         }, func = typeof (event) == "function" ? event : event[data.event.length], argList = $injector.annotate(func), params = [];
                         angular.forEach(argList, function (arg, index) {
-                            params.push(ngParams[arg] || resolver[arg]() || $injector.get(arg));
+                            params.push(ngParams[arg] || resolver[arg](ngParams) || $injector.get(arg));
                         });
                         func.apply(undefined, params);
                     });
