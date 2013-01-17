@@ -17,16 +17,38 @@ module RoutingEvents {
         return _rp;
     }).
     /// Tacks the event stack object.
-    factory('reRouteStack', function($injector) {
-        var _eventStack = {}, _id = 0;
+    factory('reRouteStack', function($injector, $q) {
+        var _eventStack = {}, _id = 0;                  
+        var events;
         return {
             // Get the full event stack object
             List : function() { return _eventStack; },
             // Register an event on route argument
             Push : function(event, args) { 
-                var id = _id++;
+                var id = _id++;                
+                // clean input for board caster
+                // if only function, run only resolver function
+                args = typeof (args) == 'function' ? { 'resolve': args }: args;
+                
+                // make sure the required properties exist, 
+                args.init = args.init && typeof (args.init) == 'function' ? args.init : function () { };
+                args.resolved = args.resolved && typeof (args.resolved) == 'function' ? args.resolved : function () { };
+                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : {};
+                
+                angular.forEach(args, function (item, index) {
+                    if (typeof (item) == 'function') {
+                        args[index] = {                                
+                            func: item,
+                            annotation : $injector.annotate(item),
+                            params : {}
+                        };
+                    }
+                });                     
+
                 _eventStack[event] = _eventStack[event] || {};
                 _eventStack[event][id] = args;
+                                                      
+                /// need to validate that this doesn't break the page.      
                 return {
                     Break: function () {
                         delete _eventStack[event][id];
@@ -36,45 +58,67 @@ module RoutingEvents {
             // Called with a route name and list of processed route variables
             // Runs any function triggered on the route.
             Broadcast: function (name, ngParams) {
-                if(_eventStack[name] != undefined) {
-                    angular.forEach(_eventStack[name], function (data, index) {
-                        var event = typeof(data) == "function" ? data : data.event,
-                            resolver = data.resolve && typeof(data.resolve) == "object" ? data.resolve : {},
-                            func = typeof (event) == "function" ? event : event[data.event.length], 
-                            argList = $injector.annotate(func),                             
-                            params = [],
-                            promises = [],
-                            promiseHandler;
-                        
-                        resolver['$promise'] = function () { return true; };
-
-                        angular.forEach(argList, function (arg, index) {
-                            var injectable = ngParams[arg] || resolver[arg](ngParams) || $injector.get(arg);
-                            params.push(injectable);
-                            
-                            if (typeof(injectable.success) == 'function' && typeof(injectable.error) == 'function'){
-                                promises.push({ 'param' : arg, 'injectable' : injectable})
-                            }
-                        });
-                        func.apply(undefined, params);
-                        
-                        if (argList.indexOf('$promise') >= 0) {                                                            
-                            angular.forEach(promises, function(promise, index) {
-                                promiseHandler= function (data, status, headers, config) {
-                                    params[argList.indexOf('$promise')] = promise.param;
-                                    params[argList.indexOf(promise.param)] = {
-                                        'data' : data,
-                                        'status' : status,
-                                        'headers' : headers,
-                                        'config' : config
-                                    };
-                                    func.apply(undefined, params);                                   
-                                };              
-                                promise.injectable.success(promiseHandler).error(promiseHandler);
-                            });
+                if(_eventStack[name] != undefined) {                    
+                                        
+                    var promises = [];
+                    var resloved = {}
+                    var globalResolved = {};
+                    var handler = function (data, status, headers, config, name, eventIndex) {
+                        if (typeof (globalResolved[name]) != 'undefined') {
+                            console.log("Warning: multiple resolvers have target the same name: " + name);
                         }
-                    });
+                        
+                        resloved[name] = resloved[name] || {};
+                        globalResolved[name] = resloved[name][eventIndex] = {
+                            'data': data,
+                            'status': status,
+                            'headers': headers,
+                            'config': config
+                        };
+                    };
 
+
+                     var y = function (resolved, arg, index) {
+                         if (typeof (resloved[arg]) != 'undefined' && typeof ([index]) != 'undefined') {
+                             return resloved[arg][index] || undefined;
+                         }
+                         return undefined;
+                    };
+                    var x = function (event, index, resolver) {
+                        var result = [];
+                        angular.forEach(event.annotation, function (arg, index) {
+                            var injectable = ngParams[arg] || y(resloved,arg,index) || globalResolved[arg] || resolver[arg](ngParams) ||  $injector.get(arg);
+                            result.push(injectable);
+                        });
+                        return result;
+                    };
+                                                                
+                    angular.forEach(_eventStack[name], function (event, index) {                                            
+                        
+                        //find all resolve elements across the fired event.
+                        angular.forEach(event.resolve, function (object, name) {
+                            var injectable = object(ngParams);                           
+                            if (typeof (injectable.success) == 'function' && typeof (injectable.error) == 'function') {
+                                promises.push(injectable.
+                                    success(function (data, status, headers, config) { 
+                                        handler(data, status, headers, config, name, index); 
+                                    }).
+                                    error(function (data, status, headers, config) { 
+                                        handler(data, status, headers, config, name, index); 
+                                    }));
+                            }
+                        });                                                
+                        
+                        // apply the init function
+                        event.init.func.apply(undefined, x(event.init, index, event.resolve));                                                                                                
+                    });                    
+
+                    // apply the resolved function
+                    $q.all(promises).then(function (requestResult) {                            
+                        angular.forEach(_eventStack[name], function (event, index) {
+                            event.resolved.func.apply(undefined, x(event.resolved, index, event.resolve));
+                        });
+                    });                                            
                 }
             }            
         };
