@@ -1,12 +1,9 @@
-/*
-      The MIT License (MIT)
+/*      The MIT License (MIT)
         Copyright (c) 2013 Sergei Golos
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-*/
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 var RoutingEvents;
 (function (RoutingEvents) {
     var _rp;
@@ -22,16 +19,16 @@ var RoutingEvents;
             List: function () {
                 return _eventStack;
             },
-            Push: function (event, args) {
+            Push: function (event, args, resolve) {
                 var id = _id++;
                 args = typeof (args) == 'function' ? {
-                    'resolve': args
+                    'resolved': args
                 } : args;
                 args.init = args.init && typeof (args.init) == 'function' ? args.init : function () {
                 };
                 args.resolved = args.resolved && typeof (args.resolved) == 'function' ? args.resolved : function () {
                 };
-                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : {
+                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : resolve || {
                 };
                 angular.forEach(args, function (item, index) {
                     if(typeof (item) == 'function') {
@@ -53,7 +50,7 @@ var RoutingEvents;
                 };
             },
             Broadcast: function (name, ngParams) {
-                if(_eventStack[name] != undefined) {
+                if(_eventStack[name] !== undefined) {
                     var promises = [];
                     var resloved = {
                     };
@@ -72,6 +69,12 @@ var RoutingEvents;
                             'config': config
                         };
                     };
+                    var z = function (resolver, arg, ngParams) {
+                        if(typeof (resolver[arg]) != 'undefined') {
+                            return resolver[arg](ngParams);
+                        }
+                        return undefined;
+                    };
                     var y = function (resolved, arg, index) {
                         if(typeof (resloved[arg]) != 'undefined' && typeof ([
                             index
@@ -83,7 +86,7 @@ var RoutingEvents;
                     var x = function (event, index, resolver) {
                         var result = [];
                         angular.forEach(event.annotation, function (arg, index) {
-                            var injectable = ngParams[arg] || y(resloved, arg, index) || globalResolved[arg] || resolver[arg](ngParams) || $injector.get(arg);
+                            var injectable = ngParams[arg] || y(resloved, arg, index) || globalResolved[arg] || z(resolver, arg, ngParams) || $injector.get(arg);
                             result.push(injectable);
                         });
                         return result;
@@ -111,7 +114,7 @@ var RoutingEvents;
         };
     }).factory('reRouter', function (reRouteStack, routeProvider) {
         return {
-            When: function (event, args) {
+            When: function (event, args, resolve) {
                 routeProvider.when(event, {
                     controller: 'ctrlRouting',
                     template: '<div style="display:none;"></div>',
@@ -121,7 +124,7 @@ var RoutingEvents;
                         }
                     }
                 });
-                return reRouteStack.Push(event, args);
+                return reRouteStack.Push(event, args, resolve);
             }
         };
     }).controller('ctrlRouting', function ($route, routeName, reRouteStack) {

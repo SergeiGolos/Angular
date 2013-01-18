@@ -24,16 +24,16 @@ module RoutingEvents {
             // Get the full event stack object
             List : function() { return _eventStack; },
             // Register an event on route argument
-            Push : function(event, args) { 
+            Push : function(event, args, resolve) { 
                 var id = _id++;                
                 // clean input for board caster
                 // if only function, run only resolver function
-                args = typeof (args) == 'function' ? { 'resolve': args }: args;
+                args = typeof (args) == 'function' ? { 'resolved': args }: args;
                 
                 // make sure the required properties exist, 
                 args.init = args.init && typeof (args.init) == 'function' ? args.init : function () { };
                 args.resolved = args.resolved && typeof (args.resolved) == 'function' ? args.resolved : function () { };
-                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : {};
+                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : resolve || {};
                 
                 angular.forEach(args, function (item, index) {
                     if (typeof (item) == 'function') {
@@ -58,7 +58,7 @@ module RoutingEvents {
             // Called with a route name and list of processed route variables
             // Runs any function triggered on the route.
             Broadcast: function (name, ngParams) {
-                if(_eventStack[name] != undefined) {                    
+                if(_eventStack[name] !== undefined) {                    
                                         
                     var promises = [];
                     var resloved = {}
@@ -77,6 +77,13 @@ module RoutingEvents {
                         };
                     };
 
+                    var z = function(resolver, arg, ngParams) {
+                        if (typeof (resolver[arg]) != 'undefined') {
+                                return resolver[arg](ngParams);
+                            }
+                            return undefined
+
+                    }
 
                      var y = function (resolved, arg, index) {
                          if (typeof (resloved[arg]) != 'undefined' && typeof ([index]) != 'undefined') {
@@ -87,7 +94,7 @@ module RoutingEvents {
                     var x = function (event, index, resolver) {
                         var result = [];
                         angular.forEach(event.annotation, function (arg, index) {
-                            var injectable = ngParams[arg] || y(resloved,arg,index) || globalResolved[arg] || resolver[arg](ngParams) ||  $injector.get(arg);
+                            var injectable = ngParams[arg] || y(resloved,arg,index) || globalResolved[arg] || z(resolver, arg, ngParams) ||  $injector.get(arg);
                             result.push(injectable);
                         });
                         return result;
@@ -127,13 +134,13 @@ module RoutingEvents {
     factory('reRouter', function (reRouteStack, routeProvider) {         
         return {
             // Register event and generate 
-            When: function (event : string, args) {                
+            When: function (event : string, args, resolve) {                
                 routeProvider.when(event, {
                     controller: 'ctrlRouting',
                     template: '<div style="display:none;"></div>',
                     resolve: { 'routeName': function () { return event; } }                    
                 });
-                return reRouteStack.Push(event, args);                
+                return reRouteStack.Push(event, args , resolve);                
             }
         };        
     }).
@@ -142,3 +149,6 @@ module RoutingEvents {
         reRouteStack.Broadcast(routeName, $route.current.params);          
     });    
 }
+
+
+
