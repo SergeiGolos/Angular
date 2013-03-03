@@ -7,8 +7,7 @@
         <!-- <link href="style.css" rel="stylesheet"> -->
 	</head>           	
 	<body>
-		<div ng-app="sample">
-			<ng-view></ng-view>		
+		<div ng-app="sample">			
 			<div class="navbar">
 				<div class="navbar-inner container">
 					<a class="brand" href="#">Events: (on both controllers)</a>
@@ -74,7 +73,7 @@
 				app.controller('ctrlTest', function($scope, reRouter) {
 						var x = "";
 				});
-
+				app.controller('gblMessage', function() { });
 				app.controller('ctrl1', function($scope, reRouter) {
 					$scope.eventList = [];
 

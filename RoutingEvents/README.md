@@ -3,8 +3,6 @@ Routing Events for AngularJS
 
 The routing implementation for angular is robust, but for smaller application can result in decent amount of ceremony code.  To simplify the process in smaller projects Routing Events brings routing events directly to the controller.  Importing the RoutingEvent module enable injecting the reRouter object into a controller.
 
-Important note: Currently, the RoutingEvents module utilize a dummy <ng-view></ng-view> section. A hidden div is rendered to it, future versions will remove this dependency.
-
 How Does it Work? ([e.g.](https://github.com/SergeiGolos/Angular/blob/master/RoutingEvents/sample.html))
 -----------------
 
@@ -13,7 +11,7 @@ In a scenario where routings main function is to load a template and overlay a c
 Plain and simple
 -----------------
 
-Inject the 'RoutingEvents' module into your application and inject the reRouter service into your controller.  Register the route with reRouter and a callback function.  And finally create dummy ng-view element with in the application scope.  Now when the route on the page matches #/Event, the $scope variable of that controller will be set to $scope.id to id from the route variable.  
+Inject the 'RoutingEvents' module into your application and inject the reRouter service into your controller.  Register the route with reRouter and a callback function. Now when the route on the page matches #/Event, the $scope variable of that controller will be set to $scope.id to id from the route variable.  
 
 	// create an application with RoutingEvents injected
 	var app = angular.module('app', ['RoutingEvents']);
@@ -164,6 +162,5 @@ Change Log
 
 TODO
 ------
-* remove dependency on nv-view and ng-controller
 * 100% Unit Test Coverage;
 * support minification friendly format
