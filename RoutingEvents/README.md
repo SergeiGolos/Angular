@@ -157,7 +157,7 @@ The extended version of When, exposes the init property where a function to proc
 Change Log
 ----------
 
-
+ + **2013.03.03**: Removed the dependency on vg-view and controller.
 
 
 TODO
