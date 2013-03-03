@@ -5,50 +5,28 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.*/
 ///<reference path="AngularTS\angular.d.ts" />
-///<reference path="AngularTS\angularPublic.d.ts" />
+///<reference path="AngulazrTS\angularPublic.d.ts" />
 module RoutingEvents {
     /// Private Variables    
     var _rp;
     var RoutingEvents = angular.module("RoutingEvents", [], function ($routeProvider) {
-        _rp = $routeProvider;
+        _rp = $routeProvider;        
     }).
     /// This factory removes further routeProvider dependency for unit testing
     factory('routeProvider', function () {
         return _rp;
     }).
     /// Tacks the event stack object.
-    factory('reRouteStack', function($injector, $q) {
-        var _eventStack = {}, _id = 0;                  
-        var events;
-        return {
+    factory('reRouteStack', function($injector) {
+        var _eventStack = {}, _id = 0;
+        return {            
             // Get the full event stack object
             List : function() { return _eventStack; },
             // Register an event on route argument
-            Push : function(event, args, resolve) { 
-                var id = _id++;                
-                // clean input for board caster
-                // if only function, run only resolver function
-                args = typeof (args) == 'function' ? { 'resolved': args }: args;
-                
-                // make sure the required properties exist, 
-                args.init = args.init && typeof (args.init) == 'function' ? args.init : function () { };
-                args.resolved = args.resolved && typeof (args.resolved) == 'function' ? args.resolved : function () { };
-                args.resolve = args.resolve && typeof (args.resolve) == 'object' ? args.resolve : resolve || {};
-                
-                angular.forEach(args, function (item, index) {
-                    if (typeof (item) == 'function') {
-                        args[index] = {                                
-                            func: item,
-                            annotation : $injector.annotate(item),
-                            params : {}
-                        };
-                    }
-                });                     
-
+            Push : function(event, args) { 
+                var id = _id++;
                 _eventStack[event] = _eventStack[event] || {};
                 _eventStack[event][id] = args;
-                                                      
-                /// need to validate that this doesn't break the page.      
                 return {
                     Break: function () {
                         delete _eventStack[event][id];
@@ -58,97 +36,95 @@ module RoutingEvents {
             // Called with a route name and list of processed route variables
             // Runs any function triggered on the route.
             Broadcast: function (name, ngParams) {
-                if(_eventStack[name] !== undefined) {                    
-                                        
-                    var promises = [];
-                    var resloved = {}
-                    var globalResolved = {};
-                    var handler = function (data, status, headers, config, name, eventIndex) {
-                        if (typeof (globalResolved[name]) != 'undefined') {
-                            console.log("Warning: multiple resolvers have target the same name: " + name);
-                        }
-                        
-                        resloved[name] = resloved[name] || {};
-                        globalResolved[name] = resloved[name][eventIndex] = {
-                            'data': data,
-                            'status': status,
-                            'headers': headers,
-                            'config': config
+                if(_eventStack[name] != undefined) {
+                    angular.forEach(_eventStack[name], function (data, index) {
+                        var event = typeof(data) == "function" ? data : data.event,
+                            resolver = data.resolve && typeof(data.resolve) == "object" ? data.resolve : {},
+                            func = typeof (event) == "function" ? event : event[data.event.length], 
+                            argList = $injector.annotate(func), 
+                            params = [];
+                            arg = "";
+
+                        var notEmpty = function(value) {
+                            if (value != null && value != undefined) {
+                                return true;
+                            }
+                            return false;
                         };
-                    };
 
-                    var z = function(resolver, arg, ngParams) {
-                        if (typeof (resolver[arg]) != 'undefined') {
-                                return resolver[arg](ngParams);
+                        for(var index in argList) {
+                            var arg = argList[index];                                                    
+                            if (notEmpty(ngParams[arg])) 
+                            {   
+                                params.push(ngParams[arg]);
+                                continue;
                             }
-                            return undefined
-
-                    }
-
-                     var y = function (resolved, arg, index) {
-                         if (typeof (resloved[arg]) != 'undefined' && typeof ([index]) != 'undefined') {
-                             return resloved[arg][index] || undefined;
-                         }
-                         return undefined;
-                    };
-                    var x = function (event, index, resolver) {
-                        var result = [];
-                        angular.forEach(event.annotation, function (arg, index) {
-                            var injectable = ngParams[arg] || y(resloved,arg,index) || globalResolved[arg] || z(resolver, arg, ngParams) ||  $injector.get(arg);
-                            result.push(injectable);
-                        });
-                        return result;
-                    };
-                                                                
-                    angular.forEach(_eventStack[name], function (event, index) {                                            
-                        
-                        //find all resolve elements across the fired event.
-                        angular.forEach(event.resolve, function (object, name) {
-                            var injectable = object(ngParams);                           
-                            if (typeof (injectable.success) == 'function' && typeof (injectable.error) == 'function') {
-                                promises.push(injectable.
-                                    success(function (data, status, headers, config) { 
-                                        handler(data, status, headers, config, name, index); 
-                                    }).
-                                    error(function (data, status, headers, config) { 
-                                        handler(data, status, headers, config, name, index); 
-                                    }));
+                            
+                            if (notEmpty(resolver[arg]) && notEmpty(resolver[arg](ngParams))) {
+                                params.push(resolver[arg](ngParams));
+                                continue;
                             }
-                        });                                                
-                        
-                        // apply the init function
-                        event.init.func.apply(undefined, x(event.init, index, event.resolve));                                                                                                
-                    });                    
+                            params.push($injector.get(arg));
+                        };                        
 
-                    // apply the resolved function
-                    $q.all(promises).then(function (requestResult) {                            
-                        angular.forEach(_eventStack[name], function (event, index) {
-                            event.resolved.func.apply(undefined, x(event.resolved, index, event.resolve));
-                        });
-                    });                                            
+                        func.apply(undefined, params);
+                    });
                 }
             }            
         };
     }).    
     // Provides a registering mechanism angular routeProvider    
-    factory('reRouter', function (reRouteStack, routeProvider) {         
+    factory('reRouter', function (reRouteStack, routeProvider, $route, $location, $browser, $rootScope) {                                
+        $rootScope.$on("$locationChangeSuccess", function(oldUrl, newUrl) {            
+            var params, match, routes = reRouteStack.List();
+            for(var path in routes) {            
+                if (!match && (params = switchRouteMatcher($location.path(), path))) {                
+                  reRouteStack.Broadcast(path, params);                                  
+                }
+            }
+        });
+
+        $rootScope.$on("$routeChangeSuccess", function(sender, x) { });
+
         return {
             // Register event and generate 
-            When: function (event : string, args, resolve) {                
-                routeProvider.when(event, {
-                    controller: 'ctrlRouting',
-                    template: '<div style="display:none;"></div>',
-                    resolve: { 'routeName': function () { return event; } }                    
-                });
-                return reRouteStack.Push(event, args , resolve);                
+            When: function (event : string, args) {                
+                return reRouteStack.Push(event, args);                
             }
         };        
-    }).
-    // Controller which process the routing elements and generates a notification event.
-    controller('ctrlRouting', function ($route, routeName, reRouteStack) {
-        reRouteStack.Broadcast(routeName, $route.current.params);          
     });    
 }
 
+function switchRouteMatcher(on, when) {
+      // TODO(i): this code is convoluted and inefficient, we should construct the route matching
+      //   regex only once and then reuse it
 
+      // Escape regexp special characters.
+      when = '^' + when.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&") + '$';
+      var regex = '',
+          params = [],
+          dst = {};
 
+      var re = /:(\w+)/g,
+          paramMatch,
+          lastMatchedIndex = 0;
+
+      while ((paramMatch = re.exec(when)) !== null) {
+        // Find each :param in `when` and replace it with a capturing group.
+        // Append all other sections of when unchanged.
+        regex += when.slice(lastMatchedIndex, paramMatch.index);
+        regex += '([^\\/]*)';
+        params.push(paramMatch[1]);
+        lastMatchedIndex = re.lastIndex;
+      }
+      // Append trailing path part.
+      regex += when.substr(lastMatchedIndex);
+
+      var match = on.match(new RegExp(regex));
+      if (match) {
+        angular.forEach(params, function(name, index) {
+          dst[name] = match[index + 1];
+        });
+      }
+      return match ? dst : null;
+    }
