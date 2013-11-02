@@ -15,7 +15,7 @@ While creating a empty proxy is not prevented, having 0 interceptors on the prox
 
 '''javascript
 
-   app.factory('logIntercept', [function() {
+    app.factory('logIntercept', [function() {
       return {
         intercept: function (invocation) {
         
@@ -45,8 +45,8 @@ We can now create the our proxy hidden behind a logger:
 
 '''Javascript
 
-var proxy = dynamicproxy.CreateClassProxy('$location', 'logIntercept');
-proxy.path();
+     var proxy = dynamicproxy.CreateClassProxy('$location', 'logIntercept');
+     proxy.path();
 
 '''
 
@@ -55,15 +55,15 @@ Hooks provide fine tuned control over the proxy functions to create on the objec
 
 '''Javascript
 
-app.factory('logHook', function () {    
-    return {
-      types : ['$location'],
-      interceptors : ['logIntercept'],
-      condition : function () {
-          return true;
-      }
-    };
-  });
+      app.factory('logHook', function () {    
+       return {
+         types : ['$location'],
+         interceptors : ['logIntercept'],
+         condition : function () {
+             return true;
+         }
+       };
+      });
   
 '''
 
@@ -71,9 +71,9 @@ You can now register the hook to automatically generate the objects with hooked 
 
 '''Javascript
 
-dynamicproxy.RegisterHook('logHook');
-var proxy = dynamicproxy.CreateClassProxy('$location');
-proxy.path(); 
+      dynamicproxy.RegisterHook('logHook');
+      var proxy = dynamicproxy.CreateClassProxy('$location');
+      proxy.path(); 
 
 '''
 
