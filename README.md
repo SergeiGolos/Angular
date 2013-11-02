@@ -13,7 +13,6 @@ Proxy object is hidden behind a number of interceptors, any of which can prevent
 ## Interceptor
 While creating a empty proxy is not prevented, having 0 interceptors on the proxy defeats the purpose.  So lets start with the interceptor.
 
-'''javascript
 
     app.factory('logIntercept', [function() {
       return {
@@ -28,7 +27,6 @@ While creating a empty proxy is not prevented, having 0 interceptors on the prox
       };
     }]);
   
-'''
 
 First thing to notice, since this is all bound to the angular dependency injection system, when creating the factory, your interceptor can have the dependencies it needs.
 
