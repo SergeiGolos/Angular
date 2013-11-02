@@ -10,7 +10,7 @@ Instead, we can create a proxy object of the rest call and a group of intercepto
 # How it works
 Proxy object is hidden behind a number of interceptors, any of which can prevent and change behavior of the call before getting to and after resolving the real factory object.
 
-## Interceptor
+### Interceptor
 While creating a empty proxy is not prevented, having 0 interceptors on the proxy defeats the purpose.  So lets start with the interceptor.
 
 
@@ -46,7 +46,7 @@ We can now create the our proxy hidden behind a logger:
      proxy.path();
 
 
-## Hook
+### Hook
 Hooks provide fine tuned control over the proxy functions to create on the objects.  Once fully implemented, each call to the proxy object should contextually decided on hook bindings.  Hooks can bind multiple Interceptors and bind to multiple types.
 
 
@@ -69,7 +69,7 @@ You can now register the hook to automatically generate the objects with hooked 
       proxy.path(); 
 
 
-# ToDo
+### ToDo
 
  - [ ] Address processing promise.  Currently this would have to be done manually, by importing $q, but it would be nice to abstract that away behind the invocation object.
  - [ ] Integrate dynamic proxy into controller resolving proxy objective for constructor.  
