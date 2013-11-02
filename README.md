@@ -15,18 +15,18 @@ While creating a empty proxy is not prevented, having 0 interceptors on the prox
 
 '''javascript
 
- app.factory('logIntercept', [function() {
-    return {
-      intercept: function (invocation) {
+   app.factory('logIntercept', [function() {
+      return {
+        intercept: function (invocation) {
         
-        console.log('LogIntercept: ' + invocation.name);
-        var result = invocation.process();
-        console.log('LogIntercept: ' + result);
+          console.log('LogIntercept: ' + invocation.name);
+          var result = invocation.process();
+          console.log('LogIntercept: ' + result);
               
-        return result;
-      }
-    };
-  }]);
+          return result;
+        }
+      };
+    }]);
   
 '''
 
