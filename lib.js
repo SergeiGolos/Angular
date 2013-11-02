@@ -5,14 +5,27 @@
 	/*angular.prototype.interceptable = function(name, type, int) {
 		return 
 
-	};*/
+	};*/	
+	proxyLib.factory('dpLog', function() {
+		var logs = [];
+		return { 
+			log : function(value) {
+				logs.push(value);
+				console.log(value);
+			},
+			length : function () {
+				return logs.length;
+			}
+		};
+	});
 
-	proxyLib.factory('LogIntercept', [ function() {
+	proxyLib.factory('LogIntercept', [ 'dpLog', function(dpLog) {
 		return {
 			intercept: function (invocation) {
-				console.log('LogIntercept: ' + invocation);
+				
+				dpLog.log('LogIntercept: ' + invocation.name);
 				var result = invocation.process();
-				console.log('LogIntercept: ' + result);
+				dpLog.log('LogIntercept: ' + result);
 
 				return result;
 			}
@@ -20,11 +33,11 @@
 	}]);
 
 	proxyLib.factory('Empty', [function() {				
-		return {
+		return {			
+			value : function () { return null; },
 			self : function () { return undefined; }
 		};
 	}]);
-
 
 	proxyLib.factory('Invocation', ['$injector', function($injector) { 
 		return {
@@ -34,22 +47,31 @@
 				var self = undefined;				
 
 				function process() {					
-					if ( depth > 0 ) {						
-						
-						var intercepter = $injector.get(_intercepters[_intercepters.length - depth])
+					var intercepter = null
+					while (intercepter == null && depth > 0) {
+						intercepter = $injector.get(_intercepters[_intercepters.length - depth])
 						depth--;
-						var result = intercepter.intercept(self);												
+						if (typeof(intercepter.intercept) != "function") {
+							intercepter = null;
+						}
+					}
+
+					if (intercepter != null) {
+						var result = intercepter.intercept(self);																
 						return result;
 					}
+					
 					return fn.apply(_args);
 				}
 
-				self = {
-					'name' : function() { return _name; },
-					'args' : function() { return _args; },
-					'intercepters' : function() { return _intercepters; },							
-					'process' : process
-				};
+				self = function () { 
+					return {
+						'name' : _name,
+						'args' : _args,
+						'intercepters' : _intercepters,							
+						'process' : process
+					};
+				}();
 
 				return self;
 			}
@@ -62,7 +84,7 @@
 		function createClassProxy (type) {									
 			var response = {};
 					
-			for (var i = 1; i < arguments.length; i++) {
+			for (var i = 1; i < arguments.length; i++) {				
 				intercepters.push(arguments[i]);				
 			}
 
@@ -72,8 +94,11 @@
 
 				if (typeof(property) == "function") {
 					response[propertyName] = function () {
-						return Invocation.create(propertyName, arguments, intercepters, property).process();
-					}
+						var name = propertyName;	
+						return function () {												
+							return Invocation.create(name, arguments, intercepters, property).process();
+						}
+					}();
 				}
 			}
 

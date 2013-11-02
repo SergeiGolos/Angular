@@ -3,9 +3,21 @@
 
 	var app = angular.module('app', ['dynProxy']);
 
-	app.factory("test", [function() {
+	
+	app.factory("ModifyIntercept", [function() {
 		return {
-			test : function () { return 1; }
+			intercept : function (invocation) { 
+				if (invocation.name == 'value') {
+					return 1;
+				}
+				return invocation.process();
+			}
 		}
 	}]);
+
+
+
+
+
+
 }());

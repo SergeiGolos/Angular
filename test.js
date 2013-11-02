@@ -1,10 +1,11 @@
 describe("DynamicProxy module", function() {
-  var dynamicProxy;
+  var dynamicProxy, dpLog;
 
   beforeEach(module('dynProxy'));
-  beforeEach(inject(function(_DynamicProxy_){
+  beforeEach(inject(function(_DynamicProxy_, _dpLog_){
       
       dynamicProxy = _DynamicProxy_;      
+      dpLog = _dpLog_;
   }));
 
   afterEach(function(){
@@ -32,35 +33,12 @@ describe("DynamicProxy module", function() {
   });
 
   it("proxy object is loaded with interceptor",function(){
-		expect(dynamicProxy.CreateClassProxy('Empty', 'LogIntercept').self()).toBe(undefined);
+		var size = dpLog.length();    
+    dynamicProxy.CreateClassProxy('Empty', 'LogIntercept').self()
+    expect(dpLog.length() - size).toBe(2);
 
   });
-
-  /*it("",function(){
-
-  	
-  });
-  it("",function(){
-
-  	
-  });
-  it("",function(){
-
-  	
-  });
-  it("",function(){
-
-  	
-  });
-  it("",function(){
-
-  	
-  });
-  it("",function(){
-
-  	
-  });*/
-
+  
 });
 
 
@@ -77,4 +55,38 @@ describe("app module", function() {
     expect(dynamicProxy).not.toBe(undefined)
     expect(dynamicProxy).not.toBe(null);
   });
+
+  it("proxy object is loaded with interceptor",function(){
+   
+    var proxy = dynamicProxy.CreateClassProxy('Empty', 'LogIntercept', 'ModifyIntercept','LogIntercept');
+    expect(proxy.self()).toBe(undefined);
+    expect(proxy.value()).toBe(1);
+   
+
+  });
+  /*it("",function(){
+
+    
+  });
+  it("",function(){
+
+    
+  });
+  it("",function(){
+
+    
+  });
+  it("",function(){
+
+    
+  });
+  it("",function(){
+
+    
+  });
+  it("",function(){
+
+    
+  });*/
+
 });
