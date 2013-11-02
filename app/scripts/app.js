@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('AngularProxyApp', [])
+angular.module('AngularProxyApp', ['dynProxy'])
   .config(function ($routeProvider) {
     $routeProvider
       .when('/', {

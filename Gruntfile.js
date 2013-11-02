@@ -133,9 +133,12 @@ module.exports = function (grunt) {
     },
     // not used since Uglify task does concat,
     // but still available if needed
-    /*concat: {
-      dist: {}
-    },*/
+    concat: {
+      dist: {      
+          src: ['app/scripts/dynProxy.js', 'app/scripts/services/*.js'],
+          dest: 'dynproxy.js'        
+      }
+    },
     rev: {
       dist: {
         files: {
@@ -329,10 +332,10 @@ module.exports = function (grunt) {
     'autoprefixer',
     'concat',
     'copy:dist',
-    'cdnify',
+    //'cdnify',
     'ngmin',
     'cssmin',
-    'uglify',
+    //'uglify',
     'rev',
     'usemin'
   ]);

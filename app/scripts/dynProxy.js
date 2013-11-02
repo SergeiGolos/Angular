@@ -1,6 +1,3 @@
-(function(){
+'use strict';
 
-
-	var proxyLib = angular.module('dynProxy', []);	
-	
-}());
+ angular.module('dynProxy', []);

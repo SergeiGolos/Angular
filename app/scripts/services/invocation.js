@@ -3,7 +3,7 @@
 angular.module('dynProxy')
   .factory('invocation', [ function() { 
     return {
-      create : function (_name, _args, _intercepters, _hooks, _object, fn) {
+      create : function (_name, _args, _intercepters, _object) {
 
         var depth = _intercepters.length;
         var self = undefined;       
@@ -23,11 +23,11 @@ angular.module('dynProxy')
             return result;
           }
           
-          return fn.apply(_args);
+          return invoke(); 
         }
 
-        function invoke(name, args) {         
-          return _object[name || _name].apply(args || _args);
+        function invoke(name, args) {                           
+          return _object[name || _name].apply(_object, args || _args);          
         }
 
         self =  {

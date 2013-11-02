@@ -1,15 +1,18 @@
 'use strict';
 
 angular.module('dynProxy')
-  .factory('logIntercept', [ 'dynlog', function(dpLog) {
+  .factory('logIntercept', [ 'dynlog', function(dynlog) {
     return {
       intercept: function (invocation) {
         
-        dpLog.log('LogIntercept: ' + invocation.name);
+        dynlog.log('LogIntercept: ' + invocation.name);
         var result = invocation.process();
-        dpLog.log('LogIntercept: ' + result);
-
+        dynlog.log('LogIntercept: ' + result);
+              
         return result;
       }
     };
   }]);
+
+
+  
