@@ -14,6 +14,7 @@ Proxy object is hidden behind a number of interceptors, any of which can prevent
 While creating a empty proxy is not prevented, having 0 interceptors on the proxy defeats the purpose.  So lets start with the interceptor.
 
 '''javascript
+
  app.factory('logIntercept', [function() {
     return {
       intercept: function (invocation) {
@@ -26,6 +27,7 @@ While creating a empty proxy is not prevented, having 0 interceptors on the prox
       }
     };
   }]);
+  
 '''
 
 First thing to notice, since this is all bound to the angular dependency injection system, when creating the factory, your interceptor can have the dependencies it needs.
@@ -42,14 +44,17 @@ The invocation object currently consist of:
 We can now create the our proxy hidden behind a logger:
 
 '''Javascript
+
 var proxy = dynamicproxy.CreateClassProxy('$location', 'logIntercept');
 proxy.path();
+
 '''
 
 ## Hook
 Hooks provide fine tuned control over the proxy functions to create on the objects.  Once fully implemented, each call to the proxy object should contextually decided on hook bindings.  Hooks can bind multiple Interceptors and bind to multiple types.
 
 '''Javascript
+
 app.factory('logHook', function () {    
     return {
       types : ['$location'],
@@ -59,14 +64,17 @@ app.factory('logHook', function () {
       }
     };
   });
+  
 '''
 
 You can now register the hook to automatically generate the objects with hooked interceptors.
 
 '''Javascript
+
 dynamicproxy.RegisterHook('logHook');
 var proxy = dynamicproxy.CreateClassProxy('$location');
 proxy.path(); 
+
 '''
 
 # ToDo
