@@ -41,17 +41,14 @@ The invocation object currently consist of:
 
 We can now create the our proxy hidden behind a logger:
 
-'''Javascript
 
      var proxy = dynamicproxy.CreateClassProxy('$location', 'logIntercept');
      proxy.path();
 
-'''
 
 ## Hook
 Hooks provide fine tuned control over the proxy functions to create on the objects.  Once fully implemented, each call to the proxy object should contextually decided on hook bindings.  Hooks can bind multiple Interceptors and bind to multiple types.
 
-'''Javascript
 
       app.factory('logHook', function () {    
        return {
@@ -63,17 +60,14 @@ Hooks provide fine tuned control over the proxy functions to create on the objec
        };
       });
   
-'''
 
 You can now register the hook to automatically generate the objects with hooked interceptors.
 
-'''Javascript
 
       dynamicproxy.RegisterHook('logHook');
       var proxy = dynamicproxy.CreateClassProxy('$location');
       proxy.path(); 
 
-'''
 
 # ToDo
 
