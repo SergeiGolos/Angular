@@ -3,15 +3,15 @@
 angular.module('dynProxy')
   .factory('invocation', [ function() { 
     return {
-      create : function (_name, _args, _intercepters, _object) {
+      create : function (_name, _args, _interceptors , _object) {
 
-        var depth = _intercepters.length;
+        var depth = _interceptors .length;
         var self = undefined;       
 
         function process() {          
           var intercepter = null
           while (intercepter == null && depth > 0) {
-            intercepter = _intercepters[_intercepters.length - depth];
+            intercepter = _interceptors [_interceptors .length - depth];
             depth--;
             if (typeof(intercepter.intercept) != "function") {
               intercepter = null;
@@ -33,7 +33,7 @@ angular.module('dynProxy')
         self =  {
             'name' : _name,
             'args' : _args,           
-            'intercepters' : _intercepters,             
+            'interceptors ' : _interceptors ,             
             'process' : process,
             'invoke' : invoke
           };        

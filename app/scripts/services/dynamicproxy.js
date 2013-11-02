@@ -2,7 +2,7 @@
 
 angular.module('dynProxy')
   .factory('dynamicproxy', ['$injector', 'invocation', function ($injector, invocation) {   
-    var intercepters = [];
+    var interceptors  = [];
     var hooks = [];
     
     function registerHook () {
@@ -17,11 +17,11 @@ angular.module('dynProxy')
       for (var i = 1; i < arguments.length; i++) {        
         
         var intercepter = $injector.get(arguments[i]);
-        intercepters.push(intercepter);       
+        interceptors .push(intercepter);       
       }
 
       var object = $injector.get(type);           
-      var registredInterceptors = intercepters;
+      var registredInterceptors = interceptors ;
 
       for(var hook in hooks) {
         if (hooks[hook].types.indexOf(type) > -1) {
@@ -41,7 +41,7 @@ angular.module('dynProxy')
             
             
             return function () {                        
-              return invocation.create(name, arguments, intercepters,  object).process();
+              return invocation.create(name, arguments, interceptors ,  object).process();
             }
           }();
         }
