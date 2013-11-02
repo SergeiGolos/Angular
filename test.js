@@ -60,7 +60,7 @@ describe("app module", function() {
    
     var proxy = dynamicProxy.CreateClassProxy('Empty', 'LogIntercept', 'ModifyIntercept','LogIntercept');
     expect(proxy.self()).toBe(undefined);
-    expect(proxy.value()).toBe(1);
+    expect(proxy.value()).toBe(2);
    
 
   });

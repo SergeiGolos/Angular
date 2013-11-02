@@ -8,7 +8,13 @@
 		return {
 			intercept : function (invocation) { 
 				if (invocation.name == 'value') {
-					return 1;
+					var value = invocation.invoke();
+					if (value === undefined) {
+						return 1;
+					}
+					if (value === null) {
+						return 2;
+					}
 				}
 				return invocation.process();
 			}

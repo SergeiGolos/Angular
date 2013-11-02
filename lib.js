@@ -41,7 +41,7 @@
 
 	proxyLib.factory('Invocation', ['$injector', function($injector) { 
 		return {
-			create : function (_name, _args, _intercepters, fn) {
+			create : function (_name, _args, _intercepters, _object, fn) {
 
 				var depth = _intercepters.length;
 				var self = undefined;				
@@ -64,14 +64,18 @@
 					return fn.apply(_args);
 				}
 
-				self = function () { 
-					return {
+				function invoke(name, args) {					
+					return _object[name || _name].apply(args || _args);
+				}
+
+				self =  {
 						'name' : _name,
-						'args' : _args,
+						'args' : _args,						
 						'intercepters' : _intercepters,							
-						'process' : process
+						'process' : process,
+						'invoke' : invoke
 					};
-				}();
+				
 
 				return self;
 			}
@@ -83,20 +87,20 @@
 		
 		function createClassProxy (type) {									
 			var response = {};
-					
 			for (var i = 1; i < arguments.length; i++) {				
 				intercepters.push(arguments[i]);				
 			}
 
-			response = $injector.get(type);
-			for(var propertyName in response) {
-				var property = response[propertyName];
-
-				if (typeof(property) == "function") {
+			object = $injector.get(type);			
+			
+			for(var propertyName in object) {				
+				if (typeof(object[propertyName]) == "function") {
 					response[propertyName] = function () {
 						var name = propertyName;	
+						var property = object[propertyName];
+
 						return function () {												
-							return Invocation.create(name, arguments, intercepters, property).process();
+							return Invocation.create(name, arguments, intercepters, object, property).process();
 						}
 					}();
 				}
