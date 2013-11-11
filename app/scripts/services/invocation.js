@@ -5,15 +5,17 @@ angular.module('dynProxy')
     return {
       create : function (_name, _args, _interceptors , _object) {
 
-        var depth = _interceptors .length;
-        var self = undefined;       
+        var depth = _interceptors.length;
+        var self = undefined;
 
         function process() {          
           var intercepter = null
           while (intercepter == null && depth > 0) {
-            intercepter = _interceptors [_interceptors .length - depth];
-            depth--;
-            if (typeof(intercepter.intercept) != "function") {
+            intercepter = _interceptors [_interceptors.length - depth];
+            depth--;            
+            // if the interceptor has no intercept function or defines a list of properties
+            if (typeof(intercepter.intercept) != "function" || 
+              (intercepter.properties.length > 0 && intercepter.properties.indexOf(_name) == -1)) {              
               intercepter = null;
             }
           }

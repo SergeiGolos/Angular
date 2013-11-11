@@ -3,7 +3,9 @@
 angular.module('dynProxy')
   .factory('logIntercept', [ 'dynlog', function(dynlog) {
     return {
-      intercept: function (invocation) {
+      priority: 10,
+      properties : [],
+      intercept: function (invocation) {        
         
         dynlog.log('LogIntercept: ' + invocation.name);
         var result = invocation.process();

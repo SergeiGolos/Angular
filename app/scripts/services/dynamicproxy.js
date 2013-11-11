@@ -1,48 +1,71 @@
 'use strict';
 
 angular.module('dynProxy')
-  .factory('dynamicproxy', ['$injector', 'invocation', function ($injector, invocation) {   
-    var interceptors  = [];
+  .factory('dynamicproxy', ['$injector', 'invocation', function ($injector, invocation) {     
+    // tracks the registred hooks.
+    var defaultPriority = 10;
     var hooks = [];
-    
-    function registerHook () {
+     
+    function _register() {
       for (var key in arguments) {
         var hook = $injector.get(arguments[key]);        
         hooks.push(hook);   
       }
     }
 
-    function createClassProxy (type) {                  
-      var response = {};
-      for (var i = 1; i < arguments.length; i++) {        
-        
-        var intercepter = $injector.get(arguments[i]);
-        interceptors .push(intercepter);       
+    function _interceptor(name) {
+      var item = $injector.get(name);
+        if (typeof(item.intercept) == "function") {
+            return item;
+        }
+        return undefined;
+    }
+
+    function _interceptors(type, args) {            
+      var interceptors = [];
+      for (var key in args) {
+        var item = _interceptor(args[key]);
+        if (item != undefined) {
+          interceptors.push(item);
+        }      
       }
 
-      var object = $injector.get(type);           
-      var registredInterceptors = interceptors ;
+      for (var key in hooks) {
+        var hook = hooks[key];
+        if (hook.types == undefined) {
+          continue;
+        }
 
-      for(var hook in hooks) {
-        if (hooks[hook].types.indexOf(type) > -1) {
-          for(var intercept in hooks[hook].interceptors) {
-            registredInterceptors.push($injector.get(hooks[hook].interceptors[intercept]));  
-          }          
-        };
+        if (hook.types.indexOf(type) > -1) {
+          for (var hookIntercept in hook.interceptors) {
+            var item = _interceptor(hook.interceptors[hookIntercept]);
+            if (item != undefined) {
+              interceptors.push(item);
+            }      
+          }
+        }
 
       }
 
+      return interceptors.sort(function(x, y) { 
+        return x.priority || defaultPriority - y.priority || defaultPriority;
+      });
+    }
+
+    function _create(type) {
+      var response = {};      
+          
+      var object = $injector.get(type);
+      var additionalArgs = [].splice.call(arguments, 1);     
+      var registredInterceptors = _interceptors(type, additionalArgs);
+      
       for(var propertyName in object) {       
-        if (typeof(object[propertyName]) == "function") {
-          response[propertyName] = function () {
-            var name = propertyName;              
-            
-
-            
-            
-            return function () {                        
-              return invocation.create(name, arguments, interceptors ,  object).process();
-            }
+        if (typeof(object[propertyName]) == "function") {          
+          response[propertyName] = function () {            
+            var name = propertyName;   
+            return function() { 
+              return invocation.create(name, arguments, registredInterceptors,  object).process();            
+            };
           }();
         }
       }
@@ -51,7 +74,7 @@ angular.module('dynProxy')
     }
 
     return {
-      CreateClassProxy : createClassProxy,
-      RegisterHook : registerHook
+      create : _create,
+      register : _register
     };
   }]);

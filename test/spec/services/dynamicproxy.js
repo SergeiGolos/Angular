@@ -17,13 +17,13 @@ describe('Service: Dynamicproxy', function () {
     expect(!!Dynamicproxy).toBe(true);
   });
 
-  it("it has a CreateClassProxy function exposed.", function() {    
-    expect(Dynamicproxy.CreateClassProxy).not.toBe(null);
-    expect(typeof(Dynamicproxy.CreateClassProxy)).toBe("function");
+  it("it has a create function exposed.", function() {    
+    expect(Dynamicproxy.create).not.toBe(null);
+    expect(typeof(Dynamicproxy.create)).toBe("function");
   });
 
-  it("creates a proxy object when CreateClassProxy is called", function() {   
-    var proxy = Dynamicproxy.CreateClassProxy('$http');
+  it("creates a proxy object when create is called", function() {   
+    var proxy = Dynamicproxy.create('$http');
     expect(typeof(proxy)).toBe("object");
     expect(typeof(proxy.post)).toBe("function");
   });
@@ -31,7 +31,7 @@ describe('Service: Dynamicproxy', function () {
   it("proxy object is loaded with interceptor",function(){
     
     var size = dynlog.length();    
-    Dynamicproxy.CreateClassProxy('$location', 'logIntercept').path()
+    Dynamicproxy.create('$location', 'logIntercept').path()
     expect(dynlog.length() - size).toBe(2);
   });
 
