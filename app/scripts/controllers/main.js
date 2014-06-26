@@ -1,8 +1,6 @@
 'use strict';
 
 angular.module('AngularProxyApp')
-  .controller('MainCtrl', function ($scope, $location, dynamicproxy) {
+  .controller('MainCtrl', function ($scope, $location) {    
     $scope.pathString = $location.path();
-	  dynamicproxy.register('logHook');
-    $scope.pathString = dynamicproxy.create('$location').path();
   });

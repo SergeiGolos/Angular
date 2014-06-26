@@ -1,7 +1,8 @@
 'use strict';
 
-angular.module('AngularProxyApp', ['dynProxy'])
-  .config(function ($routeProvider) {
+var app = angular.module('AngularProxyApp', ['dynProxy', 'ngRoute' ]);
+
+  app.config(function ($routeProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
@@ -10,4 +11,14 @@ angular.module('AngularProxyApp', ['dynProxy'])
       .otherwise({
         redirectTo: '/'
       });
-  });
+  })
+
+  app.run(function (proxyhook) {
+    proxyhook.register(function (hook) {
+        return hook.for('$location').with('logIntercept');
+    });
+
+    proxyhook.register(function (hook) {
+        return hook.for('$injector').with('callIntercept');
+    });
+  });  

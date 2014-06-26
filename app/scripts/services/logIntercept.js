@@ -1,20 +1,16 @@
-'use strict';
-
-angular.module('dynProxy')
-  .factory('logIntercept', [ 'dynlog', function(dynlog) {
-    return {
-      priority: 10,
-      properties : [],
-      intercept: function (invocation) {        
-        
-        dynlog.log('LogIntercept: ' + invocation.name);
-        var result = invocation.process();
-        dynlog.log('LogIntercept: ' + result);
-              
-        return result;
-      }
-    };
+(function() {
+  'use strict';
+  angular.module('dynProxy')
+    .factory('logIntercept', [ function() {
+      return {        
+        intercept: function (invocation) {        
+          
+          console.log('LogIntercept: ' + invocation.name);
+          var result = invocation.process();
+          console.log('LogIntercept: ' + result);
+                
+          return result;
+        }
+      };
   }]);
-
-
-  
+}());
