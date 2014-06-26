@@ -16,15 +16,19 @@ In an interceptor you are expected to call the next level in the wrapper stack a
 ### DI and the Interceptor
 Angular Proxy hijacks the default angular $injector object, which means that every time $injector is used in all of angular a proxy could be created.  This is based off the concept of hooks which we will get into a bit later.  For now lets dive into a quick example.
 
+'''JavaScript
     function myController($injector) {
       var obj = $injector.get('$location');
     }
+'''
 
 Here we have example of a controller which gets the Angular injector and pulls the $location object from the contianer.   But once the dynProxy module is loaded this function becomes more powerful.  For one it is now overloaded and can take any number of arguments.  The first argument must always be the object you are trying to resolve, the rest can be any number of interceptors you also wanted loaded on the functions of that proxy object.
 
+'''JavaScript
     function myController($injector) {
       var obj = $injector.get('$location', function(invocation) { return inovcation.process(); });
     }
+'''
 
 This would be an identity interceptor, it simply pushes returns the result of the next interceptor on the stack.  In this case, it is the only interceptor on the stack, so invocation.process() will return underlaying function from $location object.  
 
@@ -38,6 +42,7 @@ The invocation argument:
 
 Since the proxy is driven by DI, it would be wrong not to utilize it here, so the same results can be achived with a registered factory.
 
+'''JavaScript
     angular.module('app').factory('identityIntercept', function() {
       return {
         interceptor : function(invocation) { return inovcation.process(); }
@@ -47,6 +52,7 @@ Since the proxy is driven by DI, it would be wrong not to utilize it here, so th
     function myController($injector) {
       var obj = $injector.get('$location', 'identityIntercept');
     }    
+'''
 
 In this case, we create the interceptor and allow the DI system look it up for us.  Anytime an interceptor is defined it can be done with a string name for the injectable factory object or an anonymous function. This object must implement a object with a function on the interceptor property.
 
@@ -54,11 +60,13 @@ In this case, we create the interceptor and allow the DI system look it up for u
 ### Selling Point: The Hook.
 So injecting $injector into your function and creating proxies is great, but it lacks elegance for a clean solution.  If I need an interceptor on an object, chances are this is an application wide requirement, or what they would call a cross cutting concern.  Enter stage the hook.
 
+'''JavaScript
     angular.module('app', ['dynProxy']).run(function (proxyhook) {
       proxyhook.register(function (hook) {
         return hook.for('$location').with('identityIntercept');
       });
     });
+'''
 
 This code creates a permanent requirment to create $location object with an identityIntercept attached to it's functions.  This can even work on the $injector object.  This has a intersting use in debugging, allowing you log the composition of your application.  Some benefits to creating a factory inteceptor, you can utilize angular DI to inject services and factories into your inteceptor so the execution of the inteceptor can be context aware.
 
