@@ -9,8 +9,8 @@ angular binding to annotated classes.
 
 ```bash
 # Clone the repo...
-git clone https://github.com/vojtajina/atscript-playground.git
-cd atscript-playground
+git clone https://github.com/SergeiGolos/atScriptAngularAnnotation.git
+cd atScriptAngularAnnotation
 
 # Then, you need to install all the dependencies...
 npm install
