@@ -1,0 +1,7 @@
+import {ngBase} from './ngBase';
+
+export class ngFactory extends ngBase {
+	register(app, fn) {		
+		app.factory(this.name, this.wrap(fn));
+	}
+}

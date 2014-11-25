@@ -1,0 +1,15 @@
+import {ngDirective} from './lib/ngDirective';
+
+@ngDirective('hello', ['data'], {
+	scope : true,
+	template : '<div> hello {{data}}</div>',
+	restrict : 'AE'
+})
+
+export class hello {
+	constructor(data) {
+		return (scope, element, attr) => {
+			scope.data = data();
+		}
+	}
+}

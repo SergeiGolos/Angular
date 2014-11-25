@@ -1,0 +1,7 @@
+import {ngBase} from './ngBase';
+
+export class ngController extends ngBase {
+	register(app, fn) {				
+		app.controller(this.name, this.wrap(fn));
+	} 
+}

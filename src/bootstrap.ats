@@ -1,0 +1,6 @@
+import {ngBootstrap} from './lib/ngBootstrap';
+import {data} from './data';
+import {main} from './main';
+import {hello} from './hello';
+
+var app = ngBootstrap(document, angular.module('test', []), arguments);
