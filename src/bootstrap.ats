@@ -3,4 +3,6 @@ import {data} from './data';
 import {main} from './main';
 import {hello} from './hello';
 
-var app = ngBootstrap(document, angular.module('test', []), arguments);
+var app = ngBootstrap(angular.module('test', []), arguments, function(app) { 
+	angular.bootstrap(document, [app.name]);
+});

@@ -1,5 +1,5 @@
 export class ngBootstrap {
-	constructor(target, app, imports) {
+	constructor(app, imports, bootstrap) {
 		var types = [];
 		for (var key in imports) {	
 		  	for (var prop in imports[key]) {
@@ -10,7 +10,7 @@ export class ngBootstrap {
 	 	  			console.log('Auto-registered: ' + component.name);
 		  		} 		
 		  	}	
-		}  
-		angular.bootstrap(target, [ app.name ]);
-	}
+		}  	
+		bootstrap(app);
+	}	
 }

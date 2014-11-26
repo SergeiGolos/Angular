@@ -1,0 +1,82 @@
+import {ngBase} from '../../src/lib/ngBase';
+
+describe('ngBase Annotation Class: Name Only', () => {
+	var annotation;
+
+	beforeEach(() => {
+		annotation = new ngBase('name');
+	});
+
+	it('will expose name property on annotation', () => {
+		expect(annotation.name).toBe('name');
+	});
+
+	it('will default to empty list of injection depedencies', () => {
+		expect(annotation.inject).toEqual([]);
+	});
+
+	it('will default to empty object for options', () => {
+		expect(annotation.options).toEqual({});
+	});
+});
+
+describe('ngBase Annotation Class: Name and Inject List', () => {
+	var annotation;
+
+	beforeEach(() => {
+		annotation = new ngBase('name', ['test']);
+	});
+
+	it('will expose name property on annotation', () => {
+		expect(annotation.name).toBe('name');
+	});
+
+	it('will default to empty list of injection depedencies', () => {
+		expect(annotation.inject).toEqual(['test']);
+	});
+
+	it('will default to empty object for options', () => {
+		expect(annotation.options).toEqual({});
+	});	
+
+});
+
+describe('ngBase Annotation Class: Name and Inject List', () => {
+	var annotation;
+
+	beforeEach(() => {
+		annotation = new ngBase('name', ['test'], { option : 'test' });
+	});
+
+	it('will expose name property on annotation', () => {
+		expect(annotation.name).toBe('name');
+	});
+
+	it('will default to empty list of injection depedencies', () => {
+		expect(annotation.inject).toEqual(['test']);
+	});
+
+	it('will default to empty object for options', () => {
+		expect(annotation.options).toEqual({ option : 'test' });
+	});
+});
+
+describe('ngBase Annotation Class: Wrapper Injector Function', () => {
+	var annotation;
+
+	beforeEach(() => {
+		annotation = new ngBase('name', ['test']);
+	});
+
+	it('wrapper will create injector array for function', () => {
+		var fn = ()=>{};
+		expect(Array.isArray(annotation.wrap(fn))).toBe(true);
+		expect(annotation.wrap(fn).length).toBe(annotation.inject.length + 1);		
+	});
+
+	it('wrapper will create injector array for function', () => {
+		var fn = ()=>{};
+		var wrapped = annotation.wrap(fn);
+		expect(wrapped[wrapped.length - 1]).toBe(fn);
+	});
+});
