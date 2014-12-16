@@ -1,0 +1,60 @@
+import {ngBootstrap} from '../../src/lib/ngBootstrap'
+
+describe('Bootstrapping Automation', () => {
+	var app;	
+	var fn;
+
+	beforeEach(()=> {
+		app = appSpy();		
+		fn = jasmine.createSpy('fn');
+		ngBootstrap(app, [], fn);	
+	});
+
+	it('angular bootstrap is registered', () => {				
+		expect(fn).toHaveBeenCalled();	
+	})
+
+	it('angular bootstrap is with application argument', () => {				
+		expect(fn).toHaveBeenCalledWith(app);	
+	})
+});
+
+
+describe('Bootstrapping Automation with component', () => {
+	var app;
+	var type;
+	var component;
+	var instance;
+	var fn;
+
+	beforeEach(()=> {
+		app = appSpy();		
+		component = componentSpy();		
+		instance = { annotations : [component] };
+		type = { __test : true, test : instance };
+		fn = jasmine.createSpy('fn');
+
+		ngBootstrap(app, [ type ], fn);	
+	});
+
+	it('component is register', () => {				
+		expect(component.register).toHaveBeenCalled();
+	})
+
+	it('angular bootstrap is with application argument', () => {				
+		expect(component.register).toHaveBeenCalledWith(app, instance);	
+	})
+});
+
+
+function appSpy() {
+	var result = jasmine.createSpyObj('app', ['bootstrap' ]);
+	result.name = 'test';
+	return result;
+}
+
+function componentSpy() {
+	var result = jasmine.createSpyObj('component', ['register'])
+	result.name = 'test';
+	return result;
+}

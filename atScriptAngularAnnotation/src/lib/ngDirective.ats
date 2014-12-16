@@ -1,0 +1,15 @@
+import {ngBase} from './ngBase';
+
+export class ngDirective extends ngBase {
+	register(app, fn) {			
+		var options = {};
+		for (var prop in this.options)
+		{
+			options[prop] = this.options[prop];
+		}
+		app.directive(this.name, ($injector) => {			
+			options.link = $injector.invoke(this.wrap(fn));			
+			return options;
+		});
+	}
+}

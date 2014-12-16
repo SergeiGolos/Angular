@@ -1,0 +1,31 @@
+import {data} from '../../src/data';
+
+describe('Data Factory', () => {
+
+	var factory = undefined;
+
+	beforeEach(()=> {
+		factory = new data();
+	});
+
+	it('should be defined', () => {
+		expect(factory).toBeDefined();
+	});
+
+	it('is a function', () => {
+		expect(typeof(factory)).toBe('function');
+	});
+
+	it('results in "test"', () => {
+		expect(factory()).toBe('test');
+	});
+});
+
+describe('Data Factory Annotation', () => {
+	it('defines the correct name of "data"', () => {
+		expect(data.annotations[0].name).toBe('data');
+	})
+	it('defines the inject to define no dependencies', () => {
+		expect(data.annotations[0].inject).toEqual([]);
+	})	
+});

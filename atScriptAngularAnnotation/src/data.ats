@@ -1,0 +1,8 @@
+import {ngFactory} from './lib/ngFactory';
+
+@ngFactory('data')
+export class data {
+  constructor() { 
+  	return () => "test";
+  }
+}

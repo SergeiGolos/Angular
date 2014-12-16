@@ -1,0 +1,26 @@
+import {ngController} from '../../src/lib/ngController';
+
+describe('Registers controller against angular', () => {
+	var app;
+	var controller;
+	var fn
+
+	beforeEach(()=> {
+		fn = () => {};
+		app = jasmine.createSpyObj('app', ['controller']);
+		controller = new ngController('test', ['inject']);		
+		controller.register(app, fn);
+	});
+
+	it('registers a controller against angular', () => {		
+		expect(app.controller).toHaveBeenCalled();
+	});	
+
+	it('registers the name based on annotation name', () => {
+		expect(app.controller).toHaveBeenCalledWith('test', jasmine.any(Array));
+	});
+
+	it('registers the function wrapped in injection array', () => {
+		expect(app.controller).toHaveBeenCalledWith(jasmine.any(String), ['inject', fn]);
+	});
+})

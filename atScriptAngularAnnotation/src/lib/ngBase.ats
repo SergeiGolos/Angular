@@ -1,0 +1,22 @@
+export class ngBase {	
+	constructor(name, inject, options) {
+		this.args = {
+			name : name,
+			inject : inject || [],
+			options : options || {}
+		};
+	}
+
+	wrap(fn) {
+		var result = [];
+		for (var item of this.inject) {
+			result.push(item);
+		}
+		result.push(fn);
+		return result;
+	}
+
+	get name() { return this.args.name; }	
+	get inject() { return this.args.inject; }
+	get options() { return this.args.options; }
+}

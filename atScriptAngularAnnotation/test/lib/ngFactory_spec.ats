@@ -1,0 +1,26 @@
+import {ngFactory} from '../../src/lib/ngFactory';
+
+describe('Registers factory against angular app', () => {
+	var app;
+	var factory;
+	var fn;
+
+	beforeEach(()=> {
+		fn = () => {};
+		app = jasmine.createSpyObj('app', ['factory']);
+		factory = new ngFactory('test', ['inject']);
+		factory.register(app, fn);
+	});
+
+	it('registers a factory against angular', () => {		
+		expect(app.factory).toHaveBeenCalled();
+	});	
+
+	it('registers the name based on annotation name', () => {
+		expect(app.factory).toHaveBeenCalledWith('test', jasmine.any(Array));
+	});
+
+	it('registers the function wrapped in injection array', () => {
+		expect(app.factory).toHaveBeenCalledWith(jasmine.any(String), ['inject', fn]);
+	});
+})

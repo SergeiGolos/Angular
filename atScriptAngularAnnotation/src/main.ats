@@ -1,0 +1,8 @@
+import {ngController} from './lib/ngController';
+
+@ngController('main', ['$scope', 'data'])
+export class main {
+  constructor($scope, data) {
+  	$scope.data = data();
+  }
+}
